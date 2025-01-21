@@ -3,13 +3,18 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "ovmL2CrossDomainMessenger",
+        "name": "crossChainController",
         "type": "address"
       },
       {
         "internalType": "address",
         "name": "ethereumGovernanceExecutor",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "ethereumGovernanceChainId",
+        "type": "uint256"
       },
       {
         "internalType": "uint256",
@@ -87,7 +92,37 @@
   },
   {
     "inputs": [],
+    "name": "InvalidCaller",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidCrossChainController",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidEthereumGovernanceChainId",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidEthereumGovernanceExecutor",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "InvalidInitParams",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidSenderAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidSenderChainId",
     "type": "error"
   },
   {
@@ -118,11 +153,6 @@
   {
     "inputs": [],
     "name": "TimelockNotFinished",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "UnauthorizedEthereumExecutor",
     "type": "error"
   },
   {
@@ -236,25 +266,6 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "oldEthereumGovernanceExecutor",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "newEthereumGovernanceExecutor",
-        "type": "address"
-      }
-    ],
-    "name": "EthereumGovernanceExecutorUpdate",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
         "internalType": "uint256",
         "name": "oldGracePeriod",
         "type": "uint256"
@@ -311,6 +322,31 @@
     "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "originSender",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "originChainId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "message",
+        "type": "bytes"
+      }
+    ],
+    "name": "MessageReceived",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": false,
         "internalType": "uint256",
         "name": "oldMinimumDelay",
@@ -325,19 +361,6 @@
     ],
     "name": "MinimumDelayUpdate",
     "type": "event"
-  },
-  {
-    "inputs": [],
-    "name": "OVM_L2_CROSS_DOMAIN_MESSENGER",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
   },
   {
     "inputs": [
@@ -469,6 +492,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getCrossChainController",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -490,6 +526,19 @@
   {
     "inputs": [],
     "name": "getDelay",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getEthereumGovernanceChainId",
     "outputs": [
       {
         "internalType": "uint256",
@@ -587,32 +636,22 @@
   {
     "inputs": [
       {
-        "internalType": "address[]",
-        "name": "targets",
-        "type": "address[]"
+        "internalType": "address",
+        "name": "originSender",
+        "type": "address"
       },
       {
-        "internalType": "uint256[]",
-        "name": "values",
-        "type": "uint256[]"
+        "internalType": "uint256",
+        "name": "originChainId",
+        "type": "uint256"
       },
       {
-        "internalType": "string[]",
-        "name": "signatures",
-        "type": "string[]"
-      },
-      {
-        "internalType": "bytes[]",
-        "name": "calldatas",
-        "type": "bytes[]"
-      },
-      {
-        "internalType": "bool[]",
-        "name": "withDelegatecalls",
-        "type": "bool[]"
+        "internalType": "bytes",
+        "name": "message",
+        "type": "bytes"
       }
     ],
-    "name": "queue",
+    "name": "receiveCrossChainMessage",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -633,19 +672,6 @@
       }
     ],
     "name": "updateDelay",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "ethereumGovernanceExecutor",
-        "type": "address"
-      }
-    ],
-    "name": "updateEthereumGovernanceExecutor",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

@@ -129,6 +129,7 @@ type DeployedAddressInfo = {
 // ==== GLOBAL VARIABLES ====
 let g_Args: ReturnType<typeof parseCmdLineArgs>;
 let g_errors = 0;
+let g_total_checks = 0;
 // ==========================
 
 class LogCommand {
@@ -411,6 +412,7 @@ function assertEqualStruct(expected: null | ArbitraryObject, actual: Result) {
 
 async function checkViewFunction(contract: BaseContract, method: string, expectedOrObject: ArgsResult) {
   // Skip check if expected is null
+  g_total_checks += 1;
   if (expectedOrObject === null) {
     logMethodSkipped(method);
     return;
@@ -534,6 +536,7 @@ async function checkNetworkSection(state: { [key: string]: unknown }, sectionTit
           if (!rolesByHolders.has(holder)) {
             rolesByHolders.set(holder, new Set<string>());
           }
+          g_total_checks += 1;
           rolesByHolders.get(holder)?.add(role);
           const isRoleOnHolder = await contract.getFunction("hasRole").staticCall(role, holder);
           const logHandle = new LogCommand(`.hasRole(${role}, ${holder})`);
@@ -550,6 +553,7 @@ async function checkNetworkSection(state: { [key: string]: unknown }, sectionTit
       for (const [holder, rolesExpectedOnTheHolder] of rolesByHolders) {
         for (const role in entry.ozNonEnumerableAcl) {
           if (!rolesExpectedOnTheHolder.has(role)) {
+            g_total_checks += 1;
             const isRoleOnHolder = await contract.getFunction("hasRole").staticCall(role, holder);
             const logHandle = new LogCommand(`.hasRole(${role}, ${holder})`);
             try {
@@ -785,7 +789,7 @@ async function doChecks(configPath: string) {
       await checkNetworkSection(state, key);
     }
   }
-
+  log(chalk.bold(`\n${g_total_checks} checks performed.`));
   if (g_errors) {
     log(`\n${FAILURE_MARK} ${chalk.bold(`${g_errors} errors found!`)}`);
     process.exit(2);

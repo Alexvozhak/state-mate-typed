@@ -1,0 +1,131 @@
+[
+  {
+    "inputs": [],
+    "name": "Forbidden",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidCumulativeRatio",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidLength",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidToken",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "vault",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isDeposit",
+        "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint128[]",
+        "name": "ratiosX96",
+        "type": "uint128[]"
+      }
+    ],
+    "name": "ManagedRatiosOracleUpdateRatios",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "Q96",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vault",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "isDeposit",
+        "type": "bool"
+      }
+    ],
+    "name": "getTargetRatiosX96",
+    "outputs": [
+      {
+        "internalType": "uint128[]",
+        "name": "",
+        "type": "uint128[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "vault",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "isDeposit",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint128[]",
+        "name": "ratiosX96",
+        "type": "uint128[]"
+      }
+    ],
+    "name": "updateRatios",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "name": "vaultToData",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

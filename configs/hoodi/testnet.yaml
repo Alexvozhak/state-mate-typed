@@ -13,12 +13,14 @@ deployed:
     - &burner "0x87d699cBC410511216BC88E8c8523A8EFf41102b"
     - &minFirstAllocationStrategy "0x9b322efdB04840052f97649fD0C27B678De88DA2"
     - &accounting "0x7d7EcCE45cAc6eF043f34e8049399b4b03044F97"
+    - &accountingImpl "0xE633f4758B17c004656Bf33aac5ED9F14E713246"
     - &vaultHub "0xDfA0B34F28b1b6735d2df150a99048139302a80E"
     - &operatorGrid "0xccb86588b776743CCCB6572D2a6eAFd466012191"
     - &predepositGuarantee "0x4C003D5586B32359Df5f37B42A2E717E24817Ec2"
 
     # --- Oracle contracts ---
     - &accountingOracle "0xaBDf9686e4fbC7eEFff91621df82457dAb300168"
+    - &accountingOracleImpl "0x380c81b8f087f29aed8920ef12b510a182c4031c"
     - &hashConsensusForAccountingOracle "0x9F1c37DBCb2e01537786aEB2e6b4d6106dd81234"
     - &validatorsExitBusOracle "0xaf41922d0b9677e8CF21D72a318C72a5188dd9f1"
     - &hashConsensusForValidatorsExitBusOracle "0xF1BbbB0749736cC0c39eA1a1EDAA7fD36E2924d1"
@@ -52,7 +54,6 @@ deployed:
     - &aragonID "0xAa3dFDDA2670A3d2A5B9cd6669ce1E4cF99258D9"
     - &callsScript "0x207474d0f0Ba51A28ce911C2e77d6c93e231E8FD"
     - &daoFactory "0xb1833a044f74d4b37d8230941eBA11368999e057"
-    - &deployer "0x26EDb7f0f223A25EE390aCCccb577F3a31edDfC5"
     - &depositSecurityModule "0xfF772cd178D04F0B4b1EFB730c5F2B9683B31611"
     - &dummyEmptyContract "0x7c625913A9c1dcCeB0799c62C0D3dfd2C21dBbE9"
     - &ens "0x5A8bF7fe99a69c2b34B540eA09d4a48c6ae78C21"
@@ -64,7 +65,6 @@ deployed:
     - &pinnedBeaconProxy "0xF19E48C5Ad2F8aBB452F5A6AB9cb104E70495e08"
 
 roles:
-  - &DEFAULT_ADMIN_ROLE "0x2cE254Fd852d6B5023b1B2355ae96A8d752a47cf"
   - &MANAGE_CONSENSUS_CONTRACT_ROLE "0x04a0afbbd09d5ad397fc858789da4f8edd59f5ca5098d70faa490babee945c3b"
   - &MANAGE_CONSENSUS_VERSION_ROLE "0xc31b1e4b732c5173dc51d519dfa432bad95550ecc4b0f9a61c2a558a2a8e4341"
   - &SUBMIT_DATA_ROLE "0x65fa0c17458517c727737e4153dd477fa3e328cf706640b0f68b1a285c5990da"
@@ -77,6 +77,9 @@ misc:
   - &ZERO_BYTES32 "0x0000000000000000000000000000000000000000000000000000000000000000"
   - &REGISTRY_BASE "0x13f43DCe264695D4118Cbc8Adb8691ABaEa0562d"
   - &DEPOSIT_CONTRACT "0x00000000219ab540356cBB839Cbe05303d7705Fa"
+  - &MAX_UINT256 "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+  - &MAX_UINT64 "18446744073709551615"
+  - &deployer "0x26EDb7f0f223A25EE390aCCccb577F3a31edDfC5"
 
 l1:
   rpcUrl: HOODI_REMOTE_RPC_URL # https://ethereum-hoodi-rpc.publicnode.com
@@ -87,18 +90,18 @@ l1:
       name: OssifiableProxy
       address: *accounting
       checks:
-        proxy__getAdmin: *deployer # NEED TO VERIFY
-        proxy__getImplementation: "0xE633f4758B17c004656Bf33aac5ED9F14E713246" # NEED TO VERIFY
-        proxy__getIsOssified: false # NEED TO VERIFY
+        proxy__getAdmin: *aragon-agent # NEED TO VERIFY
+        proxy__getImplementation: *accountingImpl # NEED TO VERIFY
+        proxy__getIsOssified: false
     accountingOracle:
       name: AccountingOracle
       address: *accountingOracle
       proxyName: OssifiableProxy
-      implementation: "0x380c81b8f087f29aed8920ef12b510a182c4031c"
+      implementation: *accountingOracleImpl
       proxyChecks:
-        proxy__getAdmin: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
-        proxy__getImplementation: "0x380c81B8f087f29AED8920EF12b510a182C4031C" # NEED TO VERIFY
-        proxy__getIsOssified: false # NEED TO VERIFY
+        proxy__getAdmin: *aragon-agent # NEED TO VERIFY
+        proxy__getImplementation: *accountingOracleImpl # NEED TO VERIFY
+        proxy__getIsOssified: false
       checks:
         DEFAULT_ADMIN_ROLE: *ZERO_BYTES32 # NEED TO VERIFY
         EXTRA_DATA_FORMAT_EMPTY: 0 # NEED TO VERIFY
@@ -119,7 +122,7 @@ l1:
           - true
         getConsensusVersion: 3 # NEED TO VERIFY
         getContractVersion: 3 # NEED TO VERIFY
-        getLastProcessingRefSlot: 352607 # NEED TO VERIFY
+        getLastProcessingRefSlot: null
         getProcessingState:
           - 352991
           - 0
@@ -154,8 +157,8 @@ l1:
           - 0
           - false # NEED TO VERIFY
         getConsensusVersion: 0 # NEED TO VERIFY
-        getContractVersion: 115792089237316195423570985008687907853269984665640564039457584007913129639935 # NEED TO VERIFY
-        getLastProcessingRefSlot: 0 # NEED TO VERIFY
+        getContractVersion: *MAX_UINT256 # NEED TO VERIFY
+        getLastProcessingRefSlot: null
         getProcessingState: REPLACEME # view call reverted
         getRoleAdmin: REPLACEME # need to specify args
         getRoleMember: REPLACEME # need to specify args
@@ -229,11 +232,11 @@ l1:
         getEVMScriptExecutor: REPLACEME # need to specify args
         RESUME_ROLE: *RESUME_ROLE # NEED TO VERIFY
         decimals: 18 # NEED TO VERIFY
-        getRecoveryVault: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
+        getRecoveryVault: *aragon-agent # NEED TO VERIFY
         DOMAIN_SEPARATOR: "0x1d71fb0eab9b3ce61d0c245669877c7caeb4af9175f17892ec695f05f4f1ce96" # NEED TO VERIFY
         getTotalPooledEther: 3223825752768621707110 # NEED TO VERIFY
         PAUSE_ROLE: *PAUSE_ROLE # NEED TO VERIFY
-        getTreasury: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
+        getTreasury: *aragon-agent # NEED TO VERIFY
         isStopped: false # NEED TO VERIFY
         getBufferedEther: 17900000000000000010 # NEED TO VERIFY
         getWithdrawalCredentials: "0x01000000000000000000000079e52dba27718b1b618fc519a8f05a1386f4a8d2" # NEED TO VERIFY
@@ -326,8 +329,8 @@ l1:
         appId: *ZERO_BYTES32 # NEED TO VERIFY
         eip712Domain: REPLACEME # view call reverted
         getMaxMintableExternalShares: 0 # NEED TO VERIFY
-        getContractVersion: 115792089237316195423570985008687907853269984665640564039457584007913129639935 # NEED TO VERIFY
-        getInitializationBlock: 115792089237316195423570985008687907853269984665640564039457584007913129639935 # NEED TO VERIFY
+        getContractVersion: *MAX_UINT256 # NEED TO VERIFY
+        getInitializationBlock: *MAX_UINT256 # NEED TO VERIFY
         symbol: stETH # NEED TO VERIFY
         getEIP712StETH: *ZERO_ADDRESS # NEED TO VERIFY
         getMaxExternalRatioBP: 0 # NEED TO VERIFY
@@ -365,7 +368,7 @@ l1:
         hasInitialized: true # NEED TO VERIFY
         getType: "0x637572617465642d6f6e636861696e2d76310000000000000000000000000000" # NEED TO VERIFY
         getEVMScriptExecutor: REPLACEME # need to specify args
-        getRecoveryVault: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
+        getRecoveryVault: *aragon-agent # NEED TO VERIFY
         getNodeOperatorIds: REPLACEME # need to specify args
         getSigningKeys: REPLACEME # need to specify args
         getNodeOperatorIsActive: REPLACEME # need to specify args
@@ -377,7 +380,7 @@ l1:
         STAKING_ROUTER_ROLE: "0xbb75b874360e0bfd87f964eadd8276d8efb7c942134fc329b513032d0803e0c6" # NEED TO VERIFY
         appId: "0x7071f283424072341f856ac9e947e7ec0eb68719f757a7e785979b6b8717579d" # NEED TO VERIFY
         getActiveNodeOperatorsCount: 1 # NEED TO VERIFY
-        getContractVersion: 3 # NEED TO VERIFY
+        getContractVersion: *MAX_UINT256 # NEED TO VERIFY
         getInitializationBlock: 213130 # NEED TO VERIFY
         getUnusedSigningKeyCount: REPLACEME # need to specify args
         MANAGE_NODE_OPERATOR_ROLE: "0x78523850fdd761612f46e844cf5a16bda6b3151d6ae961fd7e8e7b92bfbca7f8" # NEED TO VERIFY
@@ -419,8 +422,8 @@ l1:
         STAKING_ROUTER_ROLE: "0xbb75b874360e0bfd87f964eadd8276d8efb7c942134fc329b513032d0803e0c6" # NEED TO VERIFY
         appId: *ZERO_BYTES32 # NEED TO VERIFY
         getActiveNodeOperatorsCount: 0 # NEED TO VERIFY
-        getContractVersion: 115792089237316195423570985008687907853269984665640564039457584007913129639935 # NEED TO VERIFY
-        getInitializationBlock: 115792089237316195423570985008687907853269984665640564039457584007913129639935 # NEED TO VERIFY
+        getContractVersion: *MAX_UINT256 # NEED TO VERIFY
+        getInitializationBlock: *MAX_UINT256 # NEED TO VERIFY
         getUnusedSigningKeyCount: REPLACEME # need to specify args
         MANAGE_NODE_OPERATOR_ROLE: "0x78523850fdd761612f46e844cf5a16bda6b3151d6ae961fd7e8e7b92bfbca7f8" # NEED TO VERIFY
         getNodeOperator: REPLACEME # need to specify args
@@ -492,14 +495,14 @@ l1:
         getByVersionId: REPLACEME # need to specify args
         allowRecoverability: REPLACEME # need to specify args
         appId: *ZERO_BYTES32 # NEED TO VERIFY
-        getInitializationBlock: 115792089237316195423570985008687907853269984665640564039457584007913129639935 # NEED TO VERIFY
+        getInitializationBlock: *MAX_UINT256 # NEED TO VERIFY
         getLatestForContractAddress: REPLACEME # need to specify args
         canPerform: REPLACEME # need to specify args
         getEVMScriptRegistry: REPLACEME # view call reverted
         isValidBump: REPLACEME # need to specify args
         CREATE_VERSION_ROLE: "0x1f56cfecd3595a2e6cc1a7e6cb0b20df84cdbd92eff2fee554e70e4e45a9a7d8" # NEED TO VERIFY
         getLatest: REPLACEME # view call reverted
-        getVersionsCount: 115792089237316195423570985008687907853269984665640564039457584007913129639935 # NEED TO VERIFY
+        getVersionsCount: *MAX_UINT256 # NEED TO VERIFY
         kernel: *ZERO_ADDRESS # NEED TO VERIFY
         isPetrified: true # NEED TO VERIFY
     aragonID:
@@ -533,7 +536,7 @@ l1:
       checks:
         hasInitialized: false # NEED TO VERIFY
         executorType: "0x2dc858a00f3e417be1394b87c07158e989ec681ce8cc68a9093680ac1a870302" # NEED TO VERIFY
-        getInitializationBlock: 115792089237316195423570985008687907853269984665640564039457584007913129639935 # NEED TO VERIFY
+        getInitializationBlock: *MAX_UINT256 # NEED TO VERIFY
         isPetrified: true # NEED TO VERIFY
     daoFactory:
       name: DAOFactory
@@ -643,7 +646,7 @@ l1:
       address: *executionLayerRewardsVault
       checks:
         LIDO: *lido # NEED TO VERIFY
-        TREASURY: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
+        TREASURY: *aragon-agent # NEED TO VERIFY
     hashConsensusForAccountingOracle:
       name: HashConsensus
       address: *hashConsensusForAccountingOracle
@@ -774,9 +777,9 @@ l1:
       proxyName: OssifiableProxy
       implementation: "0xc293ea75f11c0d77416d0afdf903d88a3891d16b"
       proxyChecks:
-        proxy__getAdmin: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
+        proxy__getAdmin: *aragon-agent # NEED TO VERIFY
         proxy__getImplementation: "0xC293Ea75F11C0D77416D0AFdf903d88a3891d16b" # NEED TO VERIFY
-        proxy__getIsOssified: false # NEED TO VERIFY
+        proxy__getIsOssified: false
       checks:
         accounting: *accounting # NEED TO VERIFY
         accountingOracle: *accountingOracle # NEED TO VERIFY
@@ -785,7 +788,7 @@ l1:
           - *executionLayerRewardsVault
           - *oracleReportSanityChecker
           - *stakingRouter
-          - *DEFAULT_ADMIN_ROLE
+          - *aragon-agent
           - *withdrawalQueueERC721
           - *withdrawalVault # NEED TO VERIFY
         depositSecurityModule: *depositSecurityModule # NEED TO VERIFY
@@ -805,7 +808,7 @@ l1:
         postTokenRebaseReceiver: *ZERO_ADDRESS # NEED TO VERIFY
         predepositGuarantee: *predepositGuarantee # NEED TO VERIFY
         stakingRouter: *stakingRouter # NEED TO VERIFY
-        treasury: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
+        treasury: *aragon-agent # NEED TO VERIFY
         validatorsExitBusOracle: *validatorsExitBusOracle # NEED TO VERIFY
         vaultHub: *vaultHub # NEED TO VERIFY
         withdrawalQueue: *withdrawalQueueERC721 # NEED TO VERIFY
@@ -819,7 +822,7 @@ l1:
           - *executionLayerRewardsVault
           - *oracleReportSanityChecker
           - *stakingRouter
-          - *DEFAULT_ADMIN_ROLE
+          - *aragon-agent
           - *withdrawalQueueERC721
           - *withdrawalVault # NEED TO VERIFY
         depositSecurityModule: *depositSecurityModule # NEED TO VERIFY
@@ -839,7 +842,7 @@ l1:
         postTokenRebaseReceiver: *ZERO_ADDRESS # NEED TO VERIFY
         predepositGuarantee: *predepositGuarantee # NEED TO VERIFY
         stakingRouter: *stakingRouter # NEED TO VERIFY
-        treasury: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
+        treasury: *aragon-agent # NEED TO VERIFY
         validatorsExitBusOracle: *validatorsExitBusOracle # NEED TO VERIFY
         vaultHub: *vaultHub # NEED TO VERIFY
         withdrawalQueue: *withdrawalQueueERC721 # NEED TO VERIFY
@@ -850,7 +853,7 @@ l1:
       address: *lidoTemplate
       checks:
         getConfig:
-          - *deployer
+          - *aragon-agent
           - *daoFactory
           - *ens
           - *miniMeTokenFactory
@@ -867,9 +870,9 @@ l1:
       proxyName: OssifiableProxy
       implementation: "0x7fc784952ee7e96e9a8c3f271712805fc439dfd7"
       proxyChecks:
-        proxy__getAdmin: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
+        proxy__getAdmin: *aragon-agent # NEED TO VERIFY
         proxy__getImplementation: "0x7FC784952EE7e96e9A8C3f271712805fc439dfD7" # NEED TO VERIFY
-        proxy__getIsOssified: false # NEED TO VERIFY
+        proxy__getIsOssified: false
       checks:
         DEFAULT_ADMIN_ROLE: *ZERO_BYTES32 # NEED TO VERIFY
         DEFAULT_TIER_ID: 0 # NEED TO VERIFY
@@ -972,18 +975,18 @@ l1:
       name: OssifiableProxy
       address: *predepositGuarantee
       checks:
-        proxy__getAdmin: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
+        proxy__getAdmin: *aragon-agent # NEED TO VERIFY
         proxy__getImplementation: "0x306F410c6b238348fa098761a860CAf571d84F41" # NEED TO VERIFY
-        proxy__getIsOssified: false # NEED TO VERIFY
+        proxy__getIsOssified: false
     stakingRouter:
       name: StakingRouter
       address: *stakingRouter
       proxyName: OssifiableProxy
       implementation: "0xad7a77f8eb03ac02dfb913e5a757f543cbb2f76c"
       proxyChecks:
-        proxy__getAdmin: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
+        proxy__getAdmin: *aragon-agent # NEED TO VERIFY
         proxy__getImplementation: "0xad7a77F8eB03ac02dfb913e5A757F543CBb2F76c" # NEED TO VERIFY
-        proxy__getIsOssified: false # NEED TO VERIFY
+        proxy__getIsOssified: false
       checks:
         DEFAULT_ADMIN_ROLE: *ZERO_BYTES32 # NEED TO VERIFY
         DEPOSIT_CONTRACT: *DEPOSIT_CONTRACT # NEED TO VERIFY
@@ -1120,7 +1123,7 @@ l1:
         UNSAFE_SET_EXITED_VALIDATORS_ROLE: "0x55180e25fcacf9af017d35d497765476319b23896daa1f9bc2b38fa80b36a163" # NEED TO VERIFY
         getAllNodeOperatorDigests: REPLACEME # need to specify args
         getAllStakingModuleDigests: null # NEED TO VERIFY
-        getContractVersion: 115792089237316195423570985008687907853269984665640564039457584007913129639935 # NEED TO VERIFY
+        getContractVersion: *MAX_UINT256 # NEED TO VERIFY
         getDepositsAllocation: REPLACEME # need to specify args
         getLido: *ZERO_ADDRESS # NEED TO VERIFY
         getNodeOperatorDigests: REPLACEME # need to specify args
@@ -1167,7 +1170,7 @@ l1:
       address: *stakingVaultBeacon
       checks:
         implementation: *stakingVaultImpl # NEED TO VERIFY
-        owner: *deployer # NEED TO VERIFY
+        owner: *aragon-agent # NEED TO VERIFY
     stakingVaultFactory:
       name: VaultFactory
       address: *stakingVaultFactory
@@ -1184,7 +1187,7 @@ l1:
         beaconChainDepositsPaused: false # NEED TO VERIFY
         calculateValidatorWithdrawalFee: REPLACEME # need to specify args
         depositor: *ZERO_ADDRESS # NEED TO VERIFY
-        getInitializedVersion: 18446744073709551615 # NEED TO VERIFY
+        getInitializedVersion: *MAX_UINT64 # NEED TO VERIFY
         inOutDelta: 0 # NEED TO VERIFY
         isReportFresh: true # NEED TO VERIFY
         latestReport:
@@ -1193,7 +1196,7 @@ l1:
           - 0 # NEED TO VERIFY
         locked: 0 # NEED TO VERIFY
         nodeOperator: *ZERO_ADDRESS # NEED TO VERIFY
-        ossified: false # NEED TO VERIFY
+        ossified: true # NEED TO VERIFY
         owner: *ZERO_ADDRESS # NEED TO VERIFY
         totalValue: 0 # NEED TO VERIFY
         unlocked: 0 # NEED TO VERIFY
@@ -1205,24 +1208,24 @@ l1:
       name: OssifiableProxy
       address: *validatorsExitBusOracle
       checks:
-        proxy__getAdmin: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
+        proxy__getAdmin: *aragon-agent # NEED TO VERIFY
         proxy__getImplementation: "0x2F09B020505e833a523A87e8A7EA238C40771214" # NEED TO VERIFY
-        proxy__getIsOssified: false # NEED TO VERIFY
+        proxy__getIsOssified: false
     vaultHub:
       name: VaultHub
       address: *vaultHub
       proxyName: OssifiableProxy
       implementation: "0xd075e66a593779994dfca9dd0a9a12aabc2d3b65"
       proxyChecks:
-        proxy__getAdmin: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
+        proxy__getAdmin: *aragon-agent # NEED TO VERIFY
         proxy__getImplementation: "0xd075E66A593779994dfcA9dd0A9a12aAbC2d3B65" # NEED TO VERIFY
-        proxy__getIsOssified: false # NEED TO VERIFY
+        proxy__getIsOssified: false
       checks:
         CONNECT_DEPOSIT: 1000000000000000000 # NEED TO VERIFY
         DEFAULT_ADMIN_ROLE: *ZERO_BYTES32 # NEED TO VERIFY
         LIDO: *lido # NEED TO VERIFY
         LIDO_LOCATOR: *lidoLocator # NEED TO VERIFY
-        PAUSE_INFINITELY: 115792089237316195423570985008687907853269984665640564039457584007913129639935 # NEED TO VERIFY
+        PAUSE_INFINITELY: *MAX_UINT256 # NEED TO VERIFY
         PAUSE_ROLE: "0x8d0e4ae4847b49935b55c99f9c3ce025c87e7c4604c35b7ae56929bd32fa5a78" # NEED TO VERIFY
         REPORT_FRESHNESS_DELTA: 86400 # NEED TO VERIFY
         RESUME_ROLE: "0xa79a6aede309e0d48bf2ef0f71355c06ad317956d4c0da2deb0dc47cc34f826c" # NEED TO VERIFY
@@ -1252,7 +1255,7 @@ l1:
         DEFAULT_ADMIN_ROLE: *ZERO_BYTES32 # NEED TO VERIFY
         LIDO: *lido # NEED TO VERIFY
         LIDO_LOCATOR: *lidoLocator # NEED TO VERIFY
-        PAUSE_INFINITELY: 115792089237316195423570985008687907853269984665640564039457584007913129639935 # NEED TO VERIFY
+        PAUSE_INFINITELY: *MAX_UINT256 # NEED TO VERIFY
         PAUSE_ROLE: "0x8d0e4ae4847b49935b55c99f9c3ce025c87e7c4604c35b7ae56929bd32fa5a78" # NEED TO VERIFY
         REPORT_FRESHNESS_DELTA: 86400 # NEED TO VERIFY
         RESUME_ROLE: "0xa79a6aede309e0d48bf2ef0f71355c06ad317956d4c0da2deb0dc47cc34f826c" # NEED TO VERIFY
@@ -1278,26 +1281,26 @@ l1:
       name: OssifiableProxy
       address: *withdrawalQueueERC721
       checks:
-        proxy__getAdmin: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
+        proxy__getAdmin: *aragon-agent # NEED TO VERIFY
         proxy__getImplementation: "0x15D5365e4061DA45BA2aeD01ba149d40ddCB1c78" # NEED TO VERIFY
-        proxy__getIsOssified: false # NEED TO VERIFY
+        proxy__getIsOssified: false
     withdrawalVault:
       name: WithdrawalVault
       address: *withdrawalVault
       proxyName: WithdrawalsManagerProxy
       implementation: "0xb37ef8776e07f40ce146b83a5c36c2185755c40d"
-      proxyChecks:
-        implementation: "0xb37ef8776e07f40cE146b83A5C36C2185755C40D" # NEED TO VERIFY
-        proxy_getAdmin: *aragon-voting # NEED TO VERIFY
-        proxy_getIsOssified: false # NEED TO VERIFY
+      # proxyChecks:
+      #   implementation: "0xb37ef8776e07f40cE146b83A5C36C2185755C40D" # NEED TO VERIFY
+      #   proxy_getAdmin: *aragon-voting # NEED TO VERIFY
+      #   proxy_getIsOssified: false # NEED TO VERIFY
       checks:
         LIDO: *lido # NEED TO VERIFY
-        TREASURY: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
-        getContractVersion: 0 # NEED TO VERIFY
+        TREASURY: *aragon-agent # NEED TO VERIFY
+        getContractVersion: *MAX_UINT256 # NEED TO VERIFY
       implementationChecks:
         LIDO: *lido # NEED TO VERIFY
-        TREASURY: *DEFAULT_ADMIN_ROLE # NEED TO VERIFY
-        getContractVersion: 115792089237316195423570985008687907853269984665640564039457584007913129639935 # NEED TO VERIFY
+        TREASURY: *aragon-agent # NEED TO VERIFY
+        getContractVersion: *MAX_UINT256 # NEED TO VERIFY
     wstETH:
       name: WstETH
       address: *wstETH

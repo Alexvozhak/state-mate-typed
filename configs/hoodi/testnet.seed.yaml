@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=./../../schemas/seed-schema.json
+# yaml-language-server: $schema=../../schemas/main-schema.json
 deployed:
   l1:
     # --- Core protocol ---
@@ -13,12 +13,14 @@ deployed:
     - &burner "0x87d699cBC410511216BC88E8c8523A8EFf41102b"
     - &minFirstAllocationStrategy "0x9b322efdB04840052f97649fD0C27B678De88DA2"
     - &accounting "0x7d7EcCE45cAc6eF043f34e8049399b4b03044F97"
+    - &accountingImpl "0xE633f4758B17c004656Bf33aac5ED9F14E713246"
     - &vaultHub "0xDfA0B34F28b1b6735d2df150a99048139302a80E"
     - &operatorGrid "0xccb86588b776743CCCB6572D2a6eAFd466012191"
     - &predepositGuarantee "0x4C003D5586B32359Df5f37B42A2E717E24817Ec2"
 
     # --- Oracle contracts ---
     - &accountingOracle "0xaBDf9686e4fbC7eEFff91621df82457dAb300168"
+    - &accountingOracleImpl "0x380c81b8f087f29aed8920ef12b510a182c4031c"
     - &hashConsensusForAccountingOracle "0x9F1c37DBCb2e01537786aEB2e6b4d6106dd81234"
     - &validatorsExitBusOracle "0xaf41922d0b9677e8CF21D72a318C72a5188dd9f1"
     - &hashConsensusForValidatorsExitBusOracle "0xF1BbbB0749736cC0c39eA1a1EDAA7fD36E2924d1"
@@ -52,7 +54,6 @@ deployed:
     - &aragonID "0xAa3dFDDA2670A3d2A5B9cd6669ce1E4cF99258D9"
     - &callsScript "0x207474d0f0Ba51A28ce911C2e77d6c93e231E8FD"
     - &daoFactory "0xb1833a044f74d4b37d8230941eBA11368999e057"
-    - &deployer "0x26EDb7f0f223A25EE390aCCccb577F3a31edDfC5"
     - &depositSecurityModule "0xfF772cd178D04F0B4b1EFB730c5F2B9683B31611"
     - &dummyEmptyContract "0x7c625913A9c1dcCeB0799c62C0D3dfd2C21dBbE9"
     - &ens "0x5A8bF7fe99a69c2b34B540eA09d4a48c6ae78C21"
@@ -63,7 +64,22 @@ deployed:
     - &miniMeTokenFactory "0x4d0E05677c1005C4C808cb5e824abE99b2b39497"
     - &pinnedBeaconProxy "0xF19E48C5Ad2F8aBB452F5A6AB9cb104E70495e08"
 
-l1:
-  rpcUrl: HOODI_REMOTE_RPC_URL # https://ethereum-hoodi-rpc.publicnode.com
-  explorerHostname: api-hoodi.etherscan.io
-  explorerTokenEnv: ETHERSCAN_TOKEN
+roles:
+  - &MANAGE_CONSENSUS_CONTRACT_ROLE "0x04a0afbbd09d5ad397fc858789da4f8edd59f5ca5098d70faa490babee945c3b"
+  - &MANAGE_CONSENSUS_VERSION_ROLE "0xc31b1e4b732c5173dc51d519dfa432bad95550ecc4b0f9a61c2a558a2a8e4341"
+  - &SUBMIT_DATA_ROLE "0x65fa0c17458517c727737e4153dd477fa3e328cf706640b0f68b1a285c5990da"
+  - &STAKING_CONTROL_ROLE "0xa42eee1333c0758ba72be38e728b6dadb32ea767de5b4ddbaea1dae85b1b051f"
+  - &RESUME_ROLE "0x2fc10cc8ae19568712f7a176fb4978616a610650813c9d05326c34abb62749c7"
+  - &PAUSE_ROLE "0x139c2898040ef16910dc9f44dc697df79363da767d8bc92f2e310312b816e46d"
+
+misc:
+  - &ZERO_ADDRESS "0x0000000000000000000000000000000000000000"
+  - &ZERO_BYTES32 "0x0000000000000000000000000000000000000000000000000000000000000000"
+  - &REGISTRY_BASE "0x13f43DCe264695D4118Cbc8Adb8691ABaEa0562d"
+  - &DEPOSIT_CONTRACT "0x00000000219ab540356cBB839Cbe05303d7705Fa"
+  - &MAX_UINT256 "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+  - &MAX_UINT64 "18446744073709551615"
+
+eoa:
+  - &depositSecurityModule "0xfF772cd178D04F0B4b1EFB730c5F2B9683B31611"
+  - &deployer "0x26EDb7f0f223A25EE390aCCccb577F3a31edDfC5"

@@ -133,9 +133,7 @@ export async function loadContractInfo(
     return contractInfo;
   } catch {
     const logHandler = new LogCommand(`ABI ${chalk.magenta(`${address}`)}`);
-    logHandler.failure(
-      `Failed to parse contract source code (${chalk.yellow(sourcesResponse.result[0].ABI)}). Maybe EOF?`,
-    );
+    logHandler.failure(`Failed to parse contract source code (${chalk.yellow(sourcesResponse.result[0].ABI)})`);
     return;
   }
 }

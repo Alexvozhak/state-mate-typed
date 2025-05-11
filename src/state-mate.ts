@@ -159,12 +159,29 @@ async function iterateLoadedContracts<T extends EntireDocument | SeedDocument>(
       } else if (!explorerKey) {
         log(`\n${WARNING_MARK} ${chalk.yellow(`The env var ${explorerTokenEnv} is not set`)}\n`);
       }
+      const potentialProxyAddresses: string[] = [];
       for (const address of addresses) {
         const contractInfo = await loadContractInfoFromExplorer(address, explorerHostname, explorerKey);
+        if (isProxyLike(contractInfo)) {
+          potentialProxyAddresses.push(contractInfo.address);
+        }
         await callback(contractInfo);
       }
     }
   }
+}
+
+function isProxyLike(contractInfo: ContractInfo): boolean {
+  const PROXY_NAME_PATTERN = /proxy|upgradeable|uups/i;
+
+  const isNotMarkedAsProxy = contractInfo.proxyType === undefined || contractInfo.proxyType.toString() !== "1";
+
+  return (
+    isNotMarkedAsProxy &&
+    (PROXY_NAME_PATTERN.test(contractInfo.contractName) ||
+      contractInfo.abi.some((f) => f.name === "implementation" || f.name === "proxyType") ||
+      (contractInfo.similarMatch ? contractInfo.similarMatch.toLowerCase() !== "0x0" : false))
+  );
 }
 
 async function checkNetworkSection(sectionTitle: string, section: NetworkSection) {

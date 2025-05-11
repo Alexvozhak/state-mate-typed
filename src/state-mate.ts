@@ -202,7 +202,7 @@ async function detectUnmarkedProxies<T extends EntireDocument | SeedDocument>(js
   });
 
   if (addresses.length > 0) {
-    logErrorAndExit(
+    logError(
       `\n⚠️ Contracts that look like proxies but are not marked as ones:\n${chalk.yellow(addresses.join("\n"))}` +
         `\nPlease verify these contracts manually on Etherscan.`,
     );

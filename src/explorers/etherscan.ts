@@ -32,6 +32,9 @@ function isEtherResponseOkResult(object: unknown): object is EtherResponseOkResu
 
 type EtherResponseOkResult = CommonResponseOkResult & {
   Implementation: string;
+  Proxy?: string;
+  ProxyType?: string;
+  SimilarMatch?: string;
 };
 
 async function etherRateLimitHandler(
@@ -62,7 +65,7 @@ async function etherGetContractInfoCallback(
     logErrorAndExit(`It seems, explorer response has changed`);
   }
 
-  const { ContractName, Implementation: implementationAddress } = response.result[0];
+  const { ContractName, Implementation: implementationAddress, Proxy, ProxyType, SimilarMatch } = response.result[0];
 
   let implementation;
   if (implementationAddress) {
@@ -74,6 +77,9 @@ async function etherGetContractInfoCallback(
     address: address,
     contractName: ContractName,
     implementation: implementation,
+    proxy: Proxy,
+    proxyType: ProxyType,
+    similarMatch: SimilarMatch,
   };
 
   return contractInfo;

@@ -15,7 +15,7 @@ import { doGenerateBoilerplate } from "./boilerplate-generator";
 import { parseCmdLineArguments } from "./cli-parser";
 import { printError, readUrlOrFromEnvironment } from "./common";
 import { loadContractInfoFromExplorer } from "./explorer-provider";
-import { FAILURE_MARK, log, logError, logErrorAndExit, logHeader1, WARNING_MARK } from "./logger";
+import { FAILURE_MARK, log, logError, logErrorAndExit, logHeader1, WARNING_MARK, LogCommand } from "./logger";
 import { g_errors, g_total_checks } from "./section-validators/base";
 import { ContractSectionValidator } from "./section-validators/contract";
 import {
@@ -159,6 +159,10 @@ async function iterateLoadedContracts<T extends EntireDocument | SeedDocument>(
         log(`\n${WARNING_MARK} ${chalk.yellow(`The env var ${explorerTokenEnv} is not set`)}\n`);
       }
       for (const address of addresses) {
+        if (jsonDocument.eoa?.includes(address)) {
+          continue;
+        }
+
         const contractInfo = await loadContractInfoFromExplorer(address, explorerHostname, explorerKey);
         await callback(contractInfo);
       }
@@ -178,6 +182,39 @@ async function checkNetworkSection(sectionTitle: string, section: NetworkSection
     const contractEntry = section.contracts[contractAlias];
     await contractSectionChecker.see(contractEntry, sectionTitle, contractAlias);
   }
+}
+
+async function detectUnmarkedProxies<T extends EntireDocument | SeedDocument>(jsonDocument: T) {
+  logHeader1("Proxies checking");
+  const addresses: string[] = [];
+  await iterateLoadedContracts(jsonDocument, async (contractInfo) => {
+    const logHandler = new LogCommand(`${chalk.magenta(`${contractInfo.contractName}-${contractInfo.address}`)}`);
+
+    if (shouldVerifyAsProxy(contractInfo)) {
+      logHandler.failure("Need to verify manually on Etherscan");
+      addresses.push(contractInfo.address);
+    } else {
+      logHandler.success("OK");
+    }
+  });
+
+  if (addresses.length > 0) {
+    logError(
+      `\n⚠️ Contracts that look like proxies but are not marked as ones:\n${chalk.yellow(addresses.join("\n"))}` +
+        `\nPlease verify these contracts manually on Etherscan.`,
+    );
+  }
+}
+
+function shouldVerifyAsProxy(contractInfo: ContractInfo): boolean {
+  const PROXY_NAME_PATTERN = /proxy|upgradeable|uups/i;
+  const hasSimilarMatch = contractInfo.similarMatch ? contractInfo.similarMatch.toLowerCase() !== "0x0" : false;
+  const hasProxyName = PROXY_NAME_PATTERN.test(contractInfo.contractName);
+  const alreadyProxy =
+    (contractInfo.proxyType ? contractInfo.proxyType.toString() !== "0" : false) ||
+    (contractInfo.proxy ? contractInfo.proxy.toString() !== "0" : false);
+
+  return hasSimilarMatch && !alreadyProxy && hasProxyName;
 }
 
 async function main() {
@@ -200,6 +237,7 @@ async function main() {
     }
     if (validateJsonWithSchema(jsonDocument, SeedDocumentTB)) {
       if (g_Arguments.updateAbi) {
+        await detectUnmarkedProxies(jsonDocument);
         await downloadAndCheckAllAbi(jsonDocument);
       }
       await doGenerateBoilerplate(g_Arguments.configPath, jsonDocument);
@@ -213,6 +251,7 @@ async function main() {
     }
     if (validateJsonWithSchema(jsonDocument, EntireDocumentTB)) {
       if (g_Arguments.updateAbi) {
+        await detectUnmarkedProxies(jsonDocument);
         await downloadAndCheckAllAbi(jsonDocument);
       }
       await doChecks(jsonDocument);

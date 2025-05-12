@@ -193,11 +193,11 @@ async function detectUnmarkedProxies<T extends EntireDocument | SeedDocument>(js
   await iterateLoadedContracts(jsonDocument, async (contractInfo) => {
     const logHandler = new LogCommand(`${chalk.magenta(`${contractInfo.contractName}-${contractInfo.address}`)}`);
 
-    if (isProxyLike(contractInfo)) {
-      logHandler.success("OK");
-    } else {
+    if (shouldVerifyAsProxy(contractInfo)) {
       logHandler.failure("Need to verify manually on Etherscan");
       addresses.push(contractInfo.address);
+    } else {
+      logHandler.success("OK");
     }
   });
 
@@ -209,17 +209,15 @@ async function detectUnmarkedProxies<T extends EntireDocument | SeedDocument>(js
   }
 }
 
-function isProxyLike(contractInfo: ContractInfo): boolean {
+function shouldVerifyAsProxy(contractInfo: ContractInfo): boolean {
   const PROXY_NAME_PATTERN = /proxy|upgradeable|uups/i;
+  const hasSimilarMatch = contractInfo.similarMatch ? contractInfo.similarMatch.toLowerCase() !== "0x0" : false;
+  const hasProxyName = PROXY_NAME_PATTERN.test(contractInfo.contractName);
+  const alreadyProxy =
+    (contractInfo.proxyType ? contractInfo.proxyType.toString() !== "0" : false) ||
+    (contractInfo.proxy ? contractInfo.proxy.toString() !== "0" : false);
 
-  const isNotMarkedAsProxy = contractInfo.proxyType === undefined || contractInfo.proxyType.toString() !== "1";
-
-  return (
-    isNotMarkedAsProxy &&
-    (PROXY_NAME_PATTERN.test(contractInfo.contractName) ||
-      contractInfo.abi.some((f) => f.name === "implementation" || f.name === "proxyType") ||
-      (contractInfo.similarMatch ? contractInfo.similarMatch.toLowerCase() !== "0x0" : false))
-  );
+  return hasSimilarMatch && !alreadyProxy && hasProxyName;
 }
 
 async function main() {

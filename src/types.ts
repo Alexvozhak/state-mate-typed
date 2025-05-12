@@ -8,6 +8,7 @@ export type ContractInfo = {
   address: string;
   implementation?: ContractInfo;
   proxyType?: string;
+  proxy?: string;
   similarMatch?: string;
 };
 
